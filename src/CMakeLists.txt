@@ -2,6 +2,9 @@
 add_executable (
 	PVECPP
 	"Main.cpp"
+
+	"api/internal/InternalUtility.cpp"
+
 	"api/session/PVESession.cpp"
 
 	"api/access/PVETicket.cpp"

@@ -1,5 +1,6 @@
 /* Project Headers */
 #include <pve/api/session/PVESession.hpp>
+#include <pve/api/internal/InternalUtility.hpp>
 
 /* External Headers */
 #include <curl/curl.h>
@@ -7,26 +8,6 @@
 
 /* Standard Headers */
 #include <iostream>
-
-namespace pve::internal
-{
-
-void ExtractHeaderDataFromJson(const nlohmann::json& header_data, struct curl_slist*& http_header_data)
-{
-    for(auto& [header_key, header_value] : header_data.items())
-    {
-        std::string header_item = fmt::format("{0}: {1}", header_key, header_value.get<std::string>());
-        http_header_data = curl_slist_append(http_header_data, header_item.c_str());
-    }
-}
-
-size_t CurlWriteDataFunction(void* ptr, size_t size, size_t nmemb, std::string* data)
-{
-    data->append((char*) ptr, size * nmemb);
-    return size * nmemb;
-}
-
-} // ns pve::internal
 
 namespace pve
 {
@@ -157,7 +138,7 @@ nlohmann::json PVESession::DoRequest(const std::string& http_method,
 
     // Setting HTTP headers.
     struct curl_slist* http_header_data = NULL;
-    pve::internal::ExtractHeaderDataFromJson(req_header, http_header_data);
+    pve::internal::CURLHELPER_ConvertJsonHeader(req_header, http_header_data);
     curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_HTTPHEADER, http_header_data);
 
     // Setting HTTP body
@@ -168,7 +149,7 @@ nlohmann::json PVESession::DoRequest(const std::string& http_method,
     curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_POSTFIELDS, req_body_str.c_str());
 
     // Setting the function and response variable references to store the response data itself
-    curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_WRITEFUNCTION, pve::internal::CurlWriteDataFunction);
+    curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_WRITEFUNCTION, pve::internal::CURLHELPER_WriteDataFunction);
     curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_WRITEDATA, &raw_response);
 
     // Setting the URL of the request
