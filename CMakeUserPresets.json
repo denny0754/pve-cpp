@@ -1,0 +1,50 @@
+﻿{
+  "version": 3,
+  "configurePresets": [
+	{
+		"name": "vcpkg-env",
+		"hidden": true,
+		"environment": {
+			"VCPKG_ROOT": "E:\\4. Projects\\vcpkg"
+		}
+	},
+    {
+      "name": "user-windows-base",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+	  "inherits": "vcpkg-env",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe",
+        "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "user-x64-debug",
+      "displayName": "(User)x64 Debug",
+      "inherits": "user-windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "user-x64-release",
+      "displayName": "(User)x64 Release",
+      "inherits": "user-x64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ]
+}
