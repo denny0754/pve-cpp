@@ -109,7 +109,6 @@ public:
      **/
     ~PVESession();
 
-protected:
     /**
      * 
      * The following method will perform a `GET` request to the requested
@@ -140,6 +139,36 @@ protected:
                const nlohmann::json& req_cookie
     );
 
+    /**
+     * 
+     * The following method will perform a `GET` request to the requested
+     * API path defined in `api_rel_path`.
+     * The path of the api is relative and it'll be concatenated to the full proxmox instance url.
+     * This method is just a helper method. The actual request execution is done in the `DoRequest` method.
+     * 
+     * @param api_rel_path The relative path to the requested API resource.
+     * 
+     * @param req_body The body of the request
+     * 
+     * @param req_header The header of the request
+     * 
+     * @param req_cookie The cookies of the request.
+     * 
+     * @return A JSON formatted response in the following format:
+     *  {
+     *      "data": {...}
+     *      "error": [true|false],
+     *      "errorMsg": "...",
+     *      "statusCode": [200|400|500|...]
+     *  }
+     * 
+     **/
+    nlohmann::json DoPost(const std::string& api_rel_path,
+               const nlohmann::json& req_body,
+               const nlohmann::json& req_header,
+               const nlohmann::json& req_cookie
+    );
+    
 private:
     /**
      * 
