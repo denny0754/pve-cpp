@@ -1,6 +1,7 @@
 #include <iostream>
 #include <pve/api/session/PVESession.hpp>
 #include <pve/api/access/PVETicket.hpp>
+#include <pve/api/access/PVEUser.hpp>
 
 int main()
 {
@@ -11,11 +12,15 @@ int main()
         std::cerr << "Error while initializing session..." << std::endl;
     }
 
-    pve::PVETicket _ticket = pve::PVETicket();
-    _ticket.GenerateTicket(_session);
+    // pve::PVETicket _ticket = pve::PVETicket();
+    // _ticket.GenerateTicket(_session);
 
-    std::cout << "CSRF Prevention Token: " << _ticket.GetCSRFPreventionToken() << std::endl;
-    std::cout << "Ticket: " << _ticket.GetTicket() << std::endl;
+    // std::cout << "CSRF Prevention Token: " << _ticket.GetCSRFPreventionToken() << std::endl;
+    // std::cout << "Ticket: " << _ticket.GetTicket() << std::endl;
+
+    pve::access::PVEUser root_user = pve::access::PVEUser("root@pam");
+
+    root_user.GetUser(_session);
 
     _session.Disconnect();
 }

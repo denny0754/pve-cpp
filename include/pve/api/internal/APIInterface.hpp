@@ -18,6 +18,9 @@
 
 #pragma once
 
+/* External Headers */
+#include <nlohmann/json.hpp>
+
 // Forward Declarations
 namespace pve
 {
@@ -54,7 +57,7 @@ protected:
      * to the Proxmox server.
      * 
      **/
-    virtual void DoGet(pve::PVESession&) = 0;
+    virtual void DoGet(pve::PVESession&, nlohmann::json& req_body, nlohmann::json& req_header, nlohmann::json& req_cookie) = 0;
 
     /**
      * 
@@ -62,7 +65,7 @@ protected:
      * to the Proxmox server.
      * 
      **/
-    virtual void DoPost(pve::PVESession&) = 0;
+    virtual void DoPost(pve::PVESession&, nlohmann::json& req_body, nlohmann::json& req_header, nlohmann::json& req_cookie) = 0;
 
     /**
      * 
@@ -70,7 +73,7 @@ protected:
      * to the proxmox server.
      * 
      **/
-    virtual void DoPut(pve::PVESession&) = 0;
+    virtual void DoPut(pve::PVESession&, nlohmann::json& req_body, nlohmann::json& req_header, nlohmann::json& req_cookie) = 0;
 
     /**
      * 
@@ -78,7 +81,7 @@ protected:
      * to the proxmox server.
      * 
      **/
-    virtual void DoDelete(pve::PVESession&) = 0;
+    virtual void DoDelete(pve::PVESession&, nlohmann::json& req_body, nlohmann::json& req_header, nlohmann::json& req_cookie) = 0;
 };
 
 } // pve::internal

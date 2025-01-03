@@ -43,6 +43,20 @@ void CURLHELPER_ConvertJsonHeader(const nlohmann::json& header_data, curl_slist*
 
 /**
  * 
+ * The following utility function converts a json formatted string into the following cookie format:
+ * KEY=VALUE;KEY2=VALUE2
+ * 
+ * @note For some reason, when setting auth cookie and passing a JSON formatted string, the API returns a 401(no ticket).
+ * 
+ * @param cookie_data The json formatted cookie list
+ * 
+ * @param curl_cookie_data The output on which the new cookie formatted list is stored.
+ * 
+ **/
+void CURLHELPER_ConvertJsonCookie(const nlohmann::json& cookie_data, std::string& curl_cookie_data);
+
+/**
+ * 
  * The following function is used as callback to write the response of a CURL request into an `std::string`.
  * 
  * @param curl_data The raw response data returned by the CURL perform function.

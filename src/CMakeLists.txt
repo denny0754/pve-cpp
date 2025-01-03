@@ -8,6 +8,7 @@ add_executable (
 	"api/session/PVESession.cpp"
 
 	"api/access/PVETicket.cpp"
+	"api/access/PVEUser.cpp"
 )
 
 set_target_properties(PVECPP PROPERTIES

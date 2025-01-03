@@ -45,13 +45,13 @@ public:
     }
 
 protected:
-    void DoGet(pve::PVESession& session) override;
+    void DoGet(pve::PVESession& session, nlohmann::json& req_body, nlohmann::json& req_header, nlohmann::json& req_cookie) override;
 
-    void DoPost(pve::PVESession& session) override;
+    void DoPost(pve::PVESession& session, nlohmann::json& req_body, nlohmann::json& req_header, nlohmann::json& req_cookie) override;
 
-    void DoPut(pve::PVESession& session) override;
+    void DoPut(pve::PVESession& session, nlohmann::json& req_body, nlohmann::json& req_header, nlohmann::json& req_cookie) override;
 
-    void DoDelete(pve::PVESession& session) override;
+    void DoDelete(pve::PVESession& session, nlohmann::json& req_body, nlohmann::json& req_header, nlohmann::json& req_cookie) override;
 
 private:
     std::string m_ticket;

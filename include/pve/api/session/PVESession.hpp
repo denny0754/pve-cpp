@@ -18,6 +18,9 @@
 
 #pragma once
 
+/* Project Headers */
+#include <pve/api/access/PVETicket.hpp>
+
 /* External Headers */
 #include <nlohmann/json.hpp>
 
@@ -168,7 +171,7 @@ public:
                const nlohmann::json& req_header,
                const nlohmann::json& req_cookie
     );
-    
+
 private:
     /**
      * 
@@ -203,6 +206,8 @@ private:
         const nlohmann::json& req_header,
         const nlohmann::json& req_cookie
     );
+
+    void AuthenticateUser();
 
 private:
     /**
@@ -299,6 +304,21 @@ private:
      * 
      **/
     std::string m_apiUrl;
+
+    /**
+     * 
+     * The ticket that will be used for all calls to the Proxmox instance.
+     * User and password are not allowed to be used on any of the API resources.
+     * 
+     **/
+    pve::PVETicket m_sessionTicket;
+
+    /**
+     * 
+     * 
+     * 
+     **/
+    time_t m_ticketExpirationTime;
 };
 
 } // ns pve

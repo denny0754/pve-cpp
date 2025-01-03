@@ -17,6 +17,15 @@ void CURLHELPER_ConvertJsonHeader(const nlohmann::json& header_data, curl_slist*
     }
 }
 
+void CURLHELPER_ConvertJsonCookie(const nlohmann::json& cookie_data, std::string& curl_cookie_data)
+{
+    for(auto& [header_key, header_value] : cookie_data.items())
+    {
+        std::string header_item = fmt::format("{0}: {1}", header_key, header_value.get<std::string>());
+        curl_cookie_data = fmt::format("{0}={1};{2}", header_key, header_value.get<std::string>(), curl_cookie_data);
+    }
+}
+
 size_t CURLHELPER_WriteDataFunction(char* curl_data, size_t size, size_t nmemb, std::string* user_data)
 {
     user_data->append((char*) curl_data, size * nmemb);

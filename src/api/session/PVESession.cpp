@@ -65,6 +65,8 @@ void PVESession::Connect()
         m_apiUrl = fmt::format("{0}://{1}:{2}", protocol, m_pveHostname, m_pvePort);
 
         m_connected = true;
+
+        AuthenticateUser();
     }
 }
 
@@ -131,22 +133,30 @@ nlohmann::json PVESession::DoRequest(const std::string& http_method,
         return json_response;
     }
 
-    // curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLOPT_VERBOSE, 1L);
+    // curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLOPT_VERBOSE, 2L);
 
     // Setting the HTTP method
     curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_CUSTOMREQUEST, http_method.c_str());
 
     // Setting HTTP headers.
+    nlohmann::json req_header_chg = req_header;
+    req_header_chg["CSRFPreventionToken"] = m_sessionTicket.GetCSRFPreventionToken();
     struct curl_slist* http_header_data = NULL;
     pve::internal::CURLHELPER_ConvertJsonHeader(req_header, http_header_data);
     curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_HTTPHEADER, http_header_data);
 
     // Setting HTTP body
     nlohmann::json req_body_chg = req_body;
-    req_body_chg["username"] = fmt::format("{0}@{1}", m_pveUsername, m_pveRealm);
-    req_body_chg["password"] = m_pvePassword;
+    if(m_sessionTicket.GetTicket().empty())
+    {
+        req_body_chg["username"] = fmt::format("{0}@{1}", m_pveUsername, m_pveRealm);
+        req_body_chg["password"] = m_pvePassword;
+    }
     std::string req_body_str = req_body_chg.dump();
-    curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_POSTFIELDS, req_body_str.c_str());
+    if(http_method.compare("GET"))
+    {
+        curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_POSTFIELDS, req_body_str.c_str());
+    }
 
     // Setting the function and response variable references to store the response data itself
     curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_WRITEFUNCTION, pve::internal::CURLHELPER_WriteDataFunction);
@@ -156,10 +166,18 @@ nlohmann::json PVESession::DoRequest(const std::string& http_method,
     std::string req_url = fmt::format("{0}{1}", m_apiUrl, api_rel_path);
     curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_URL, req_url.c_str());
 
-    // Setting the cookie
-    curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_COOKIE, req_cookie.dump().c_str());
+    // Enabling the Cookie engine
+    curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_COOKIEFILE, "");
 
-    // Setting SSL Verification flags
+    // Setting the cookie
+    nlohmann::json req_cookie_chg = req_cookie;
+    req_cookie_chg["PVEAuthCookie"] = m_sessionTicket.GetTicket();
+    // std::string req_cookie_str = req_cookie_chg.dump();
+    std::string req_cookie_str = std::string();
+    pve::internal::CURLHELPER_ConvertJsonCookie(req_cookie_chg, req_cookie_str);
+    curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_COOKIE, req_cookie_str.c_str());
+
+    // Setting SSL Verification flags   
     curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_SSL_VERIFYHOST, m_verifySsl);
     curl_easy_setopt((CURL*)m_nativeCurlHandle, CURLoption::CURLOPT_SSL_VERIFYPEER, m_verifySsl);
 
@@ -181,7 +199,7 @@ nlohmann::json PVESession::DoRequest(const std::string& http_method,
     // If the execution of the request is OK
     else
     {
-        json_response["data"] = nlohmann::json::parse(raw_response);
+        json_response["data"] = nlohmann::json::parse(raw_response)["data"];
         json_response["error"] = false;
         json_response["errorMsg"] = "";
         json_response["statuscode"] = status_code;
@@ -193,6 +211,12 @@ nlohmann::json PVESession::DoRequest(const std::string& http_method,
     http_header_data = nullptr;
 
     return json_response;
+}
+
+void PVESession::AuthenticateUser()
+{
+    m_sessionTicket = pve::PVETicket();
+    m_sessionTicket.GenerateTicket(*this);
 }
 
 } // ns pve
